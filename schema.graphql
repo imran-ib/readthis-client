@@ -148,7 +148,9 @@ input NestedStringNullableFilter {
 }
 
 type Query {
-  me: User
+  """Returns back Current User if there is any otherwise returns null"""
+  CurrentUser: User
+  users(after: UserWhereUniqueInput, before: UserWhereUniqueInput, first: Int, last: Int): [User!]!
 }
 
 enum QueryMode {
@@ -221,4 +223,11 @@ input UserWhereInput {
   rhandler: StringFilter
   updatedAt: DateTimeFilter
   username: StringFilter
+}
+
+input UserWhereUniqueInput {
+  email: String
+  id: Int
+  rhandler: String
+  username: String
 }

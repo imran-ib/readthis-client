@@ -7,6 +7,8 @@ import {
   ValidationError,
   AuthenticationError,
 } from 'apollo-server-express'
+import * as cookie from 'cookie'
+import { serialize } from 'cookie'
 
 export const Mutation = mutationType({
   definition(t) {
@@ -29,17 +31,21 @@ export const Mutation = mutationType({
       ) => {
         try {
           // if Empty field throw error
-          if (
-            email.trim() === '' ||
-            username.trim() === '' ||
-            password.trim() == ''
-          )
-            return new UserInputError(`Missing Required Field`)
+          if (email.trim() === '') {
+            return new UserInputError(`Email is required`)
+          }
+          if (username.trim() === '') {
+            return new UserInputError(`Username is required`)
+          }
+          if (password.trim() === '') {
+            return new UserInputError(`Password is required`)
+          }
+
           //Validate Email
           const ValidEmail = validateEmail(email)
           if (!ValidEmail)
             return new Error(
-              `${email} is not Valid email. Please Provide a valid email. `,
+              `${email} is not Valid email. Please provide a valid email. `,
             )
           // check if User Already Register
           const UserExists = await ctx.prisma.user.findFirst({
@@ -48,11 +54,11 @@ export const Mutation = mutationType({
             },
           })
           if (UserExists)
-            return new Error(`User Already Register with this email`)
+            return new Error(`User already registered with this email`)
 
           //if Password is short throw Error
           if (password.length < 4) {
-            return new UserInputError(`Password is Too Short`)
+            return new UserInputError(`Password is too short`)
           }
           // Hash Password
           const hashedPassword: string = await Hash(password)
@@ -70,11 +76,23 @@ export const Mutation = mutationType({
               lastSeen: new Date().toISOString(),
             },
           })
-          if (!User) return new ValidationError(`unable to Create User`)
+          if (!User) return new ValidationError(`unable to create user`)
           // create Token;
           const UAt = GenerateToken(User)
-          // TODO Send Cookie
-          
+          // set cookie
+          ctx.res.set(
+            'Set-Cookie',
+            serialize('UAt', UAt, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'strict',
+              // sever day's
+              //TODO Check if this is correct(7days)
+              maxAge: 3600 * 24 * 7,
+              path: '/',
+            }),
+          )
+
           return {
             UAt,
             user: User,
@@ -118,7 +136,19 @@ export const Mutation = mutationType({
         }
         // create Token;
         const UAt = GenerateToken(user)
-        // TODO Send Cookie
+
+        ctx.res.set(
+          'Set-Cookie',
+          serialize('UAt', UAt, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            // sever day's
+            //TODO Check if this is correct(7days)
+            maxAge: 3600 * 24 * 7,
+            path: '/',
+          }),
+        )
         return {
           UAt,
           user,

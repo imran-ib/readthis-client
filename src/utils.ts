@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken'
 import * as crypto from 'crypto'
 import { User } from '@prisma/client'
 
-const JWT_SECRET = process.env.APP_SECRET || ''
+const JWT_SECRET = process.env.APP_SECRET!
 
 interface Token {
   userId: string
@@ -55,5 +55,6 @@ export const GenerateToken = (user: User) => {
     header: { lastSeen: new Date().toISOString() },
     issuer: `readthis.com`,
     audience: 'read this Users',
+    algorithm: 'HS256',
   })
 }

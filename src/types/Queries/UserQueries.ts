@@ -1,17 +1,30 @@
 import { intArg, nullable, queryType, stringArg } from 'nexus'
 import { getUserId } from '../../utils'
 
+import { AuthenticationError } from 'apollo-server-express'
+
 export const Query = queryType({
   definition(t) {
-    t.nullable.field('me', {
+    t.crud.users()
+    t.nullable.field('CurrentUser', {
       type: 'User',
-      resolve: (parent, args, ctx) => {
-        const userId = getUserId(ctx)
-        return ctx.prisma.user.findOne({
-          where: {
-            id: Number(userId),
-          },
-        })
+      description:
+        'Returns back Current User if there is any otherwise returns null',
+
+      //@ts-ignore
+      resolve: async (parent, args, ctx) => {
+        try {
+          const userId = getUserId(ctx)
+          if (!userId) return null
+          const CurrentUser = await ctx.prisma.user.findUnique({
+            where: {
+              id: Number(userId),
+            },
+          })
+          return CurrentUser
+        } catch (error) {
+          return new AuthenticationError(error.message)
+        }
       },
     })
   },
