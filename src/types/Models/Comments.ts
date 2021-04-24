@@ -9,6 +9,7 @@ export const Comment = objectType({
     t.model.author()
     t.model.authorId()
     t.model.posts()
+
     t.model.postId()
     t.model.createdAt()
   },

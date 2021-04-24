@@ -65,6 +65,13 @@ input DateTimeFilter {
   notIn: [DateTime!]
 }
 
+input EnumRoleFilter {
+  equals: Role
+  in: [Role!]
+  not: NestedEnumRoleFilter
+  notIn: [Role!]
+}
+
 input FloatNullableFilter {
   equals: Float
   gt: Float
@@ -111,6 +118,9 @@ type Mutation {
   deleteManyUser(where: UserWhereInput): BatchPayload!
   login(emailOrUsername: String!, password: String!): AuthPayload
 
+  """Remove cookie from header"""
+  logout: String
+
   """Create New User"""
   Register(email: String!, firstName: String, lastName: String, password: String!, username: String!): AuthPayload
 }
@@ -129,6 +139,13 @@ input NestedDateTimeFilter {
   lte: DateTime
   not: NestedDateTimeFilter
   notIn: [DateTime!]
+}
+
+input NestedEnumRoleFilter {
+  equals: Role
+  in: [Role!]
+  not: NestedEnumRoleFilter
+  notIn: [Role!]
 }
 
 input NestedFloatNullableFilter {
@@ -271,6 +288,11 @@ enum QueryMode {
   insensitive
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
 enum SortOrder {
   asc
   desc
@@ -357,6 +379,7 @@ type User {
   lastSeen: DateTime!
   lastTyped: DateTime!
   rhandler: String!
+  role: Role!
   updatedAt: DateTime!
   username: String!
 }
@@ -381,6 +404,7 @@ input UserWhereInput {
   PasswordResetTokenExpiry: FloatNullableFilter
   posts: PostListRelationFilter
   rhandler: StringFilter
+  role: EnumRoleFilter
   subs: SubListRelationFilter
   updatedAt: DateTimeFilter
   username: StringFilter

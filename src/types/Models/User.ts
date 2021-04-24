@@ -15,5 +15,6 @@ export const User = objectType({
     t.model.lastTyped()
     t.model.createdAt()
     t.model.updatedAt()
+    t.model.role()
   },
 })

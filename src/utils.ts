@@ -24,7 +24,7 @@ export const getCookieFromReq = (req: Request): string => {
   }
 }
 
-//TODO Remove this
+//TODO Remove this if using Header token authentication on client side
 // NOTE To Get id from Header Token
 // export function getUserId(context: Context) {
 //   const Authorization = context.req.get('Authorization')

@@ -12,7 +12,7 @@ import { serialize } from 'cookie'
 import { ObjectDefinitionBlock } from 'nexus/dist/core'
 
 export const UserMutations = (t: ObjectDefinitionBlock<'Mutation'>) => {
-  t.crud.deleteManyUser() // TODO Delete This
+  // t.crud.deleteManyUser() // TODO Delete This
   t.nullable.field('Register', {
     type: 'AuthPayload',
     args: {
@@ -153,6 +153,24 @@ export const UserMutations = (t: ObjectDefinitionBlock<'Mutation'>) => {
         UAt,
         user,
       }
+    },
+  })
+  t.field('logout', {
+    type: 'String',
+    description: 'Remove cookie from header',
+    //@ts-ignore
+    resolve: (_, __, ctx) => {
+      ctx.res.set(
+        'Set-Cookie',
+        serialize('UAt', '', {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          expires: new Date(0),
+          path: '/',
+        }),
+      )
+      return `Success! You are logged out`
     },
   })
 }
