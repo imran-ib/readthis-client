@@ -1,1 +1,1 @@
-export * from './UserQueries'
+export * from './index'

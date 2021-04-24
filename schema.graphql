@@ -16,6 +16,42 @@ input BoolFilter {
   not: NestedBoolFilter
 }
 
+type Comment {
+  author: User!
+  authorId: Int!
+  body: String!
+  createdAt: DateTime!
+  id: Int!
+  identifier: String!
+  postId: Int!
+  posts: Post!
+}
+
+input CommentListRelationFilter {
+  every: CommentWhereInput
+  none: CommentWhereInput
+  some: CommentWhereInput
+}
+
+input CommentWhereInput {
+  AND: [CommentWhereInput!]
+  author: UserWhereInput
+  authorId: IntFilter
+  body: StringFilter
+  createdAt: DateTimeFilter
+  id: IntFilter
+  identifier: StringFilter
+  NOT: [CommentWhereInput!]
+  OR: [CommentWhereInput!]
+  postId: IntFilter
+  posts: PostWhereInput
+  updatedAt: DateTimeFilter
+}
+
+input CommentWhereUniqueInput {
+  id: Int
+}
+
 scalar DateTime
 
 input DateTimeFilter {
@@ -63,6 +99,15 @@ input IntNullableFilter {
 }
 
 type Mutation {
+  """Create new comment"""
+  CreateComment(body: String!, identifier: String!, slug: String!): Comment
+
+  """Create new Post"""
+  CreatePost(body: String, image: String, sub: String!, title: String!): Post
+
+  """Create new Sub"""
+  CreateSub(bannerUrn: String, description: String!, imageUrn: String, name: String!, title: String!): Sub
+  deleteManySub(where: SubWhereInput): BatchPayload!
   deleteManyUser(where: UserWhereInput): BatchPayload!
   login(emailOrUsername: String!, password: String!): AuthPayload
 
@@ -147,15 +192,88 @@ input NestedStringNullableFilter {
   startsWith: String
 }
 
+type Post {
+  author: User!
+  authorId: Int!
+  body: String
+  comments(after: CommentWhereUniqueInput, before: CommentWhereUniqueInput, first: Int, last: Int): [Comment!]!
+  createdAt: DateTime!
+  id: Int!
+  identifier: String!
+  image: String
+  linkToSub: String
+  slug: String!
+  sub: Sub!
+  subName: String!
+  title: String!
+  updatedAt: DateTime!
+}
+
+input PostListRelationFilter {
+  every: PostWhereInput
+  none: PostWhereInput
+  some: PostWhereInput
+}
+
+input PostOrderByInput {
+  authorId: SortOrder
+  body: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  identifier: SortOrder
+  image: SortOrder
+  linkToSub: SortOrder
+  postId: SortOrder
+  slug: SortOrder
+  subName: SortOrder
+  title: SortOrder
+  updatedAt: SortOrder
+}
+
+input PostWhereInput {
+  AND: [PostWhereInput!]
+  author: UserWhereInput
+  authorId: IntFilter
+  body: StringNullableFilter
+  comments: CommentListRelationFilter
+  createdAt: DateTimeFilter
+  id: IntFilter
+  identifier: StringFilter
+  image: StringNullableFilter
+  linkToSub: StringNullableFilter
+  NOT: [PostWhereInput!]
+  OR: [PostWhereInput!]
+  postId: IntFilter
+  slug: StringFilter
+  sub: SubWhereInput
+  subName: StringFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input PostWhereUniqueInput {
+  id: Int
+}
+
 type Query {
   """Returns back Current User if there is any otherwise returns null"""
   CurrentUser: User
+
+  """Get Single Post"""
+  GetOnePost(identifier: String!, slug: String!): Post
+  posts(after: PostWhereUniqueInput, before: PostWhereUniqueInput, first: Int, last: Int, orderBy: [PostOrderByInput!], where: PostWhereInput): [Post!]!
+  subs(after: SubWhereUniqueInput, before: SubWhereUniqueInput, first: Int, last: Int): [Sub!]!
   users(after: UserWhereUniqueInput, before: UserWhereUniqueInput, first: Int, last: Int): [User!]!
 }
 
 enum QueryMode {
   default
   insensitive
+}
+
+enum SortOrder {
+  asc
+  desc
 }
 
 input StringFilter {
@@ -188,6 +306,46 @@ input StringNullableFilter {
   startsWith: String
 }
 
+type Sub {
+  authorId: Int!
+  bannerUrn: String
+  description: String
+  id: Int!
+  imageUrn: String
+  name: String!
+  posts(after: PostWhereUniqueInput, before: PostWhereUniqueInput, first: Int, last: Int): [Post!]!
+  title: String!
+}
+
+input SubListRelationFilter {
+  every: SubWhereInput
+  none: SubWhereInput
+  some: SubWhereInput
+}
+
+input SubWhereInput {
+  AND: [SubWhereInput!]
+  author: UserWhereInput
+  authorId: IntFilter
+  bannerUrn: StringNullableFilter
+  createdAt: DateTimeFilter
+  description: StringNullableFilter
+  id: IntFilter
+  imageUrn: StringNullableFilter
+  name: StringFilter
+  NOT: [SubWhereInput!]
+  OR: [SubWhereInput!]
+  posts: PostListRelationFilter
+  title: StringFilter
+  updatedAt: DateTimeFilter
+}
+
+input SubWhereUniqueInput {
+  id: Int
+  name: String
+  title: String
+}
+
 type User {
   avatar: String
   createdAt: DateTime!
@@ -206,6 +364,7 @@ type User {
 input UserWhereInput {
   AND: [UserWhereInput!]
   avatar: StringNullableFilter
+  comments: CommentListRelationFilter
   createdAt: DateTimeFilter
   email: StringFilter
   firstName: StringNullableFilter
@@ -220,7 +379,9 @@ input UserWhereInput {
   password: StringFilter
   PasswordResetToken: StringNullableFilter
   PasswordResetTokenExpiry: FloatNullableFilter
+  posts: PostListRelationFilter
   rhandler: StringFilter
+  subs: SubListRelationFilter
   updatedAt: DateTimeFilter
   username: StringFilter
 }

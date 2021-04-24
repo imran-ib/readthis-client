@@ -6,6 +6,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+enum Role {
+  USER
+  ADMIN
+}
 
 model User {
   id                                       Int      @default(autoincrement()) @id
@@ -27,27 +31,28 @@ model User {
   comments                                 Comment[]
   createdAt                                DateTime   @default(now())
   updatedAt                                DateTime   @updatedAt
+  role                                     Role     @default(USER)
+  @@index([email, username])
 }
 
 model Sub {
   id                                       Int      @default(autoincrement()) @id
   name                                     String @unique
+  title                                    String @unique
   description                              String?
   imageUrn                                 String?
   bannerUrn                                String?
   author                                   User        @relation(fields: [authorId], references: [id])
   authorId                                 Int         
-  posts                                    Post        @relation(fields: [postId], references: [id])
-  postId                                   Int         
+  posts                                    Post[]
   createdAt                                DateTime   @default(now())
   updatedAt                                DateTime   @updatedAt
 }
 
 model Comment {
   id                                       Int      @default(autoincrement()) @id
-  text                                     String 
+  identifier                               String 
   body                                     String
-  username                                 String
   author                                   User        @relation(fields: [authorId], references: [id])
   authorId                                 Int         
   posts                                    Post        @relation(fields: [postId], references: [id])
@@ -64,12 +69,13 @@ model Post {
   identifier                               String 
   title                                    String 
   body                                     String? 
+  linkToSub                                String? 
+  image                                    String? // not updated
   slug                                     String 
   subName                                  String 
-  sub                                      Sub[]
+  sub                                      Sub @relation(fields: [postId], references: [id])
+  postId                                   Int  
   comments                                 Comment[]
   createdAt                                DateTime   @default(now())
   updatedAt                                DateTime   @updatedAt  
 }
-
-

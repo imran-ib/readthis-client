@@ -1,1 +1,1 @@
-export * from './UserMutations'
+export * from './index'

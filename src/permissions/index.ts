@@ -10,5 +10,9 @@ const rules = {
 
 export const permissions = shield({
   Query: {},
-  Mutation: {},
+  Mutation: {
+    CreatePost: rules.isAuthenticatedUser,
+    CreateSub: rules.isAuthenticatedUser,
+    CreateComment: rules.isAuthenticatedUser,
+  },
 })
