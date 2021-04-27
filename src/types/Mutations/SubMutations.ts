@@ -49,7 +49,7 @@ export const SubMutations = (t: ObjectDefinitionBlock<'Mutation'>) => {
         const SubExists = await ctx.prisma.sub.findFirst({
           where: {
             name: name.toLowerCase(),
-          },
+           },
         })
 
         if (SubExists) return new Error(`Sub Already Exists`)

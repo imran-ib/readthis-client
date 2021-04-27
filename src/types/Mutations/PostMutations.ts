@@ -1,21 +1,11 @@
-import { compare, hash } from 'bcryptjs'
-import { sign } from 'jsonwebtoken'
-import { intArg, mutationType, nonNull, nullable, stringArg } from 'nexus'
-import {
-  getUserId,
-  validateEmail,
-  Hash,
-  GenerateToken,
-  makeId,
-  slugify,
-} from '../../utils'
+import { nonNull, nullable, stringArg } from 'nexus'
+import { getUserId, makeId, slugify } from '../../utils'
 import {
   UserInputError,
   ValidationError,
   AuthenticationError,
 } from 'apollo-server-express'
-import * as cookie from 'cookie'
-import { serialize } from 'cookie'
+
 import { ObjectDefinitionBlock } from 'nexus/dist/core'
 
 export const PostMutations = (t: ObjectDefinitionBlock<'Mutation'>) => {
@@ -58,6 +48,7 @@ export const PostMutations = (t: ObjectDefinitionBlock<'Mutation'>) => {
             image,
           },
         })
+
         if (!Post) return new UserInputError(`Post Cannot be created.`)
         return Post
         // check if title and sub is empty

@@ -32,7 +32,7 @@ export const CommentsMutations = (t: ObjectDefinitionBlock<'Mutation'>) => {
       try {
         const userId = getUserId(ctx)
         if (!userId) return new Error(`You must login first`)
-        //get the const
+        //get the post
         const Post = await ctx.prisma.post.findFirst({
           where: { AND: [{ slug }, { identifier }] },
         })

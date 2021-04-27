@@ -20,11 +20,13 @@ type Comment {
   author: User!
   authorId: Int!
   body: String!
+  commentVoteCount: Int!
   createdAt: DateTime!
   id: Int!
   identifier: String!
   postId: Int!
   posts: Post!
+  userVote: Int
 }
 
 input CommentListRelationFilter {
@@ -38,6 +40,7 @@ input CommentWhereInput {
   author: UserWhereInput
   authorId: IntFilter
   body: StringFilter
+  commentVoteCount: IntFilter
   createdAt: DateTimeFilter
   id: IntFilter
   identifier: StringFilter
@@ -46,6 +49,8 @@ input CommentWhereInput {
   postId: IntFilter
   posts: PostWhereInput
   updatedAt: DateTimeFilter
+  userVote: IntNullableFilter
+  votes: VoteListRelationFilter
 }
 
 input CommentWhereUniqueInput {
@@ -70,6 +75,13 @@ input EnumRoleFilter {
   in: [Role!]
   not: NestedEnumRoleFilter
   notIn: [Role!]
+}
+
+input EnumVoteTypeFilter {
+  equals: VoteType
+  in: [VoteType!]
+  not: NestedEnumVoteTypeFilter
+  notIn: [VoteType!]
 }
 
 input FloatNullableFilter {
@@ -115,7 +127,6 @@ type Mutation {
   """Create new Sub"""
   CreateSub(bannerUrn: String, description: String!, imageUrn: String, name: String!, title: String!): Sub
   deleteManySub(where: SubWhereInput): BatchPayload!
-  deleteManyUser(where: UserWhereInput): BatchPayload!
   login(emailOrUsername: String!, password: String!): AuthPayload
 
   """Remove cookie from header"""
@@ -123,6 +134,9 @@ type Mutation {
 
   """Create New User"""
   Register(email: String!, firstName: String, lastName: String, password: String!, username: String!): AuthPayload
+
+  """Up Or Down Vote"""
+  ToggleVote(CommentId: Int, PostId: Int, slug: String, value: Int!, VoteType: String!): VotePayload!
 }
 
 input NestedBoolFilter {
@@ -146,6 +160,13 @@ input NestedEnumRoleFilter {
   in: [Role!]
   not: NestedEnumRoleFilter
   notIn: [Role!]
+}
+
+input NestedEnumVoteTypeFilter {
+  equals: VoteType
+  in: [VoteType!]
+  not: NestedEnumVoteTypeFilter
+  notIn: [VoteType!]
 }
 
 input NestedFloatNullableFilter {
@@ -219,11 +240,14 @@ type Post {
   identifier: String!
   image: String
   linkToSub: String
+  postCommentsCount: Int!
+  postVoteCount: Int!
   slug: String!
   sub: Sub!
   subName: String!
   title: String!
   updatedAt: DateTime!
+  userVote: Int
 }
 
 input PostListRelationFilter {
@@ -240,11 +264,14 @@ input PostOrderByInput {
   identifier: SortOrder
   image: SortOrder
   linkToSub: SortOrder
+  postCommentsCount: SortOrder
   postId: SortOrder
+  postVoteCount: SortOrder
   slug: SortOrder
   subName: SortOrder
   title: SortOrder
   updatedAt: SortOrder
+  userVote: SortOrder
 }
 
 input PostWhereInput {
@@ -260,12 +287,16 @@ input PostWhereInput {
   linkToSub: StringNullableFilter
   NOT: [PostWhereInput!]
   OR: [PostWhereInput!]
+  postCommentsCount: IntFilter
   postId: IntFilter
+  postVoteCount: IntFilter
   slug: StringFilter
   sub: SubWhereInput
   subName: StringFilter
   title: StringFilter
   updatedAt: DateTimeFilter
+  userVote: IntNullableFilter
+  votes: VoteListRelationFilter
 }
 
 input PostWhereUniqueInput {
@@ -273,11 +304,15 @@ input PostWhereUniqueInput {
 }
 
 type Query {
+  comment(where: CommentWhereUniqueInput!): Comment
+  comments(after: CommentWhereUniqueInput, before: CommentWhereUniqueInput, first: Int, last: Int): [Comment!]!
+
   """Returns back Current User if there is any otherwise returns null"""
   CurrentUser: User
 
   """Get Single Post"""
   GetOnePost(identifier: String!, slug: String!): Post
+  post(where: PostWhereUniqueInput!): Post
   posts(after: PostWhereUniqueInput, before: PostWhereUniqueInput, first: Int, last: Int, orderBy: [PostOrderByInput!], where: PostWhereInput): [Post!]!
   subs(after: SubWhereUniqueInput, before: SubWhereUniqueInput, first: Int, last: Int): [Sub!]!
   users(after: UserWhereUniqueInput, before: UserWhereUniqueInput, first: Int, last: Int): [User!]!
@@ -408,6 +443,7 @@ input UserWhereInput {
   subs: SubListRelationFilter
   updatedAt: DateTimeFilter
   username: StringFilter
+  votes: VoteListRelationFilter
 }
 
 input UserWhereUniqueInput {
@@ -415,4 +451,51 @@ input UserWhereUniqueInput {
   id: Int
   rhandler: String
   username: String
+}
+
+type Vote {
+  comment: Comment
+  commentId: Int
+  createdAt: DateTime!
+  id: Int!
+  post: Post
+  postId: Int
+  updatedAt: DateTime!
+  user: User!
+  userId: Int!
+  value: Int!
+  VoteType: VoteType!
+}
+
+input VoteListRelationFilter {
+  every: VoteWhereInput
+  none: VoteWhereInput
+  some: VoteWhereInput
+}
+
+type VotePayload {
+  comment: Comment
+  post: Post
+}
+
+enum VoteType {
+  VOTE_COMMENT
+  VOTE_POST
+}
+
+input VoteWhereInput {
+  AND: [VoteWhereInput!]
+  comment: CommentWhereInput
+  commentId: IntNullableFilter
+  createdAt: DateTimeFilter
+  id: IntFilter
+  NOT: [VoteWhereInput!]
+  OR: [VoteWhereInput!]
+  post: PostWhereInput
+  postId: IntNullableFilter
+  updatedAt: DateTimeFilter
+  user: UserWhereInput
+  userId: IntFilter
+  value: IntFilter
+  VoteType: EnumVoteTypeFilter
 }

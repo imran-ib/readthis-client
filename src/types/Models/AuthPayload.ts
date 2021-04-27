@@ -1,9 +1,9 @@
-import { objectType } from 'nexus'
+import { objectType } from "nexus";
 
 export const AuthPayload = objectType({
-  name: 'AuthPayload',
+  name: "AuthPayload",
   definition(t) {
-    t.string('UAt')
-    t.field('user', { type: 'User' })
+    t.string("UAt");
+    t.field("user", { type: "User" });
   },
-})
+});
